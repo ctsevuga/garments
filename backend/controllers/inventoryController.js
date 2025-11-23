@@ -1,6 +1,6 @@
 import asyncHandler from "../middleware/asyncHandler.js";
 import Inventory from "../models/inventoryModel.js";
-import Unit from "../models/unitModel.js";
+import Unit from "../models/unitmodel.js";
 
 /**
  * @desc Create new inventory item
