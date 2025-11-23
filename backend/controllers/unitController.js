@@ -1,5 +1,5 @@
 import asyncHandler from "../middleware/asyncHandler.js";
-import Unit from "../models/unitModel.js";
+import Unit from "../models/unitmodel.js";
 import User from "../models/userModel.js";
 
 // @desc    Create a new production unit
