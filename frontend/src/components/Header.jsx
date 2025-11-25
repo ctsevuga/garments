@@ -223,7 +223,7 @@ const Header = () => {
                 height="45"
                 className="rounded-circle border border-2 border-success"
               />
-              <span className="fw-bold fs-5 text-success">Nutritionist</span>
+              <span className="fw-bold fs-5 text-success">Garments</span>
             </Navbar.Brand>
           </LinkContainer>
 
