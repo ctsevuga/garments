@@ -2,6 +2,9 @@ import asyncHandler from "../middleware/asyncHandler.js";
 import ProductionStage from "../models/productionStageModel.js";
 import Order from "../models/orderModel.js";
 import Unit from "../models/unitmodel.js";
+// Add this at the top of your file
+import mongoose from 'mongoose';
+
 
 // @desc    Create a new production stage
 // @route   POST /api/production-stages
@@ -43,44 +46,44 @@ const getAllProductionStages = asyncHandler(async (req, res) => {
     order,
     unit,
     stage,
-    startDate,
-    endDate,
+    type,
     progressMin,
     progressMax,
+    page: pageQuery,
+    limit: limitQuery,
   } = req.query;
 
   // Pagination
-  const page = parseInt(req.query.page) || 1;
-  const limit = parseInt(req.query.limit) || 10;
+  const page = parseInt(pageQuery) || 1;
+  const limit = parseInt(limitQuery) || 10;
   const skip = (page - 1) * limit;
 
-  // Build filter query
+  // Build safe filter query
   const matchQuery = {};
 
-  if (order) matchQuery.order = new mongoose.Types.ObjectId(order);
-
-  if (unit) matchQuery.unit = new mongoose.Types.ObjectId(unit);
-
-  if (stage) matchQuery.stage = stage;
-
-  if (startDate && endDate) {
-    matchQuery.createdAt = {
-      $gte: new Date(startDate),
-      $lte: new Date(endDate),
-    };
-  } else if (startDate) {
-    matchQuery.createdAt = { $gte: new Date(startDate) };
-  } else if (endDate) {
-    matchQuery.createdAt = { $lte: new Date(endDate) };
+  if (unit && mongoose.Types.ObjectId.isValid(unit)) {
+    matchQuery.unit = new mongoose.Types.ObjectId(unit);
   }
 
-  if (progressMin || progressMax) {
+  if (order && mongoose.Types.ObjectId.isValid(order)) {
+    matchQuery.order = new mongoose.Types.ObjectId(order);
+  }
+
+  if (stage && stage.trim() !== "") {
+    matchQuery.stage = stage;
+  }
+
+  if (type && type.trim() !== "") {
+    matchQuery.type = type;
+  }
+
+  if (progressMin !== undefined || progressMax !== undefined) {
     matchQuery.progress = {};
-    if (progressMin) matchQuery.progress.$gte = Number(progressMin);
-    if (progressMax) matchQuery.progress.$lte = Number(progressMax);
+    if (progressMin !== undefined) matchQuery.progress.$gte = Number(progressMin);
+    if (progressMax !== undefined) matchQuery.progress.$lte = Number(progressMax);
   }
 
-  // Fetch Production Stages
+  // Fetch production stages with pagination
   const stages = await ProductionStage.find(matchQuery)
     .populate("order", "orderNumber client qty deadline")
     .populate("unit", "name city manager")
@@ -98,6 +101,11 @@ const getAllProductionStages = asyncHandler(async (req, res) => {
     stages,
   });
 });
+
+export default getAllProductionStages;
+
+
+
 
 // @desc    Get a single production stage by ID
 // @route   GET /api/production-stages/:id
